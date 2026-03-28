@@ -109,7 +109,6 @@ model.load_state_dict(torch.load(model_path, map_location=device))
 model.eval()
 
 return model, device
-```
 
 transform = transforms.Compose([
 transforms.Resize((224, 224)),
