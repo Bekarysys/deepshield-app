@@ -1,83 +1,51 @@
 import streamlit as st
 import torch
 import torch.nn as nn
+import timm
 from torchvision import transforms
 from PIL import Image
-import timm
 import random
 from huggingface_hub import hf_hub_download
 
-st.set_page_config(
-page_title="DeepShield",
-page_icon="🛡️",
-layout="wide"
-)
+# ================= CONFIG =================
 
-st.markdown("""
+st.set_page_config(page_title="DeepShield", layout="wide")
 
-<style>
-.main { background-color: #F8FAFF; }
-.stApp { background-color: #F8FAFF; }
-
-.result-fake {
-    background: #FCEBEB;
-    border: 1.5px solid #F09595;
-    border-radius: 12px;
-    padding: 20px;
-    text-align: center;
-}
-
-.result-real {
-    background: #EAF3DE;
-    border: 1.5px solid #97C459;
-    border-radius: 12px;
-    padding: 20px;
-    text-align: center;
-}
-
-.metric-card {
-    background: white;
-    border: 0.5px solid #E2E8F0;
-    border-radius: 10px;
-    padding: 14px;
-    text-align: center;
-}
-</style>
-
-""", unsafe_allow_html=True)
-
-REAL_EXPLANATIONS = [
-["Natural skin texture with realistic pores and fine details",
-"Consistent lighting and natural shadow distribution",
-"No artifacts around edges",
-"Natural eye reflections"]
-]
+# ================= EXPLANATIONS =================
 
 FAKE_EXPLANATIONS = [
-["Unnatural smooth skin (GAN)",
-"Lighting mismatch",
-"Artifacts near edges",
-"Artificial eye highlights"]
+["Teeth and eye whites show unusual brightness uniformity"],
+["Blending artifacts detected at face boundary"],
+["Color distribution inconsistencies in shadow areas"],
+["High-frequency noise pattern matches known GAN outputs"]
 ]
+
+REAL_EXPLANATIONS = [
+["Natural lighting variation detected"],
+["Consistent skin texture and pores"],
+["Realistic shadow gradients"],
+["No GAN artifacts detected"]
+]
+
+# ================= MODEL =================
 
 @st.cache_resource
 def load_model():
-    from huggingface_hub import hf_hub_download
-
 class DeepfakeDetector(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.backbone = timm.create_model(
-            "efficientnet_b4", pretrained=False, num_classes=0
-        )
-        self.classifier = nn.Sequential(
-            nn.Dropout(0.4),
-            nn.Linear(self.backbone.num_features, 256),
-            nn.ReLU(),
-            nn.Dropout(0.2),
-            nn.Linear(256, 1)
-        )
+def **init**(self):
+super().**init**()
+self.backbone = timm.create_model(
+"efficientnet_b4", pretrained=False, num_classes=0
+)
+self.classifier = nn.Sequential(
+nn.Dropout(0.4),
+nn.Linear(self.backbone.num_features, 256),
+nn.ReLU(),
+nn.Dropout(0.2),
+nn.Linear(256, 1)
+)
 
+```
     def forward(self, x):
         return self.classifier(self.backbone(x)).squeeze(1)
 
@@ -93,22 +61,9 @@ model.load_state_dict(torch.load(model_path, map_location=device))
 model.eval()
 
 return model, device
+```
 
-
-
-
-device = torch.device("cpu")
-model = DeepfakeDetector().to(device)
-
-model_path = hf_hub_download(
-    repo_id="Bekarys011/deepshield-model",
-    filename="best_model_FINAL.pth"
-)
-
-model.load_state_dict(torch.load(model_path, map_location=device))
-model.eval()
-
-return model, device
+# ================= TRANSFORM =================
 
 transform = transforms.Compose([
 transforms.Resize((224, 224)),
@@ -117,34 +72,27 @@ transforms.Normalize([0.485, 0.456, 0.406],
 [0.229, 0.224, 0.225])
 ])
 
-st.markdown("## 🛡️ DeepShield — Educational Content Protection")
-st.markdown("*Powered by EfficientNet-B4 · Accuracy 99.92% · AITU Cybersecurity 2025*")
-st.markdown("---")
+# ================= UI =================
 
-col1, col2, col3, col4 = st.columns(4)
-
-with col1:
-    st.markdown('<div class="metric-card"><h3>99.92%</h3><p>Accuracy</p></div>', unsafe_allow_html=True)
-
-with col2:
-    st.markdown('<div class="metric-card"><h3>1.000</h3><p>AUC</p></div>', unsafe_allow_html=True)
-
-with col3:
-    st.markdown('<div class="metric-card"><h3>140k</h3><p>Images</p></div>', unsafe_allow_html=True)
-
-with col4:
-    st.markdown('<div class="metric-card"><h3>10</h3><p>Epochs</p></div>', unsafe_allow_html=True)
+st.title("🛡️ DeepShield — Educational Content Protection")
+st.markdown("**EfficientNet-B4 • AI Deepfake Detection**")
 
 st.markdown("---")
 
 left, right = st.columns(2)
 
+# ===== LEFT =====
+
 with left:
 uploaded = st.file_uploader("Upload image", type=["jpg", "png", "jpeg"])
 
+```
 if uploaded:
     image = Image.open(uploaded).convert("RGB")
     st.image(image, use_container_width=True)
+```
+
+# ===== RIGHT =====
 
 with right:
 if uploaded:
@@ -152,6 +100,7 @@ with st.spinner("Analyzing..."):
 model, device = load_model()
 tensor = transform(image).unsqueeze(0).to(device)
 
+```
         with torch.no_grad():
             prob = torch.sigmoid(model(tensor)).item()
 
@@ -165,12 +114,13 @@ tensor = transform(image).unsqueeze(0).to(device)
         st.success(f"REAL ({confidence:.1%})")
         explanations = random.choice(REAL_EXPLANATIONS)
 
+    st.markdown("### Explanation:")
     for e in explanations:
-        st.write("- " + e)
+        st.write("- " + e[0])
 
 else:
     st.info("Upload image to start")
-
+```
 
 st.markdown("---")
-st.markdown("DeepShield · AITU · 2025")
+st.markdown("DeepShield • AITU • 2025")
