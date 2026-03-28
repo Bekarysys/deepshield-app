@@ -102,12 +102,38 @@ def load_model():
             )
         def forward(self, x):
             return self.classifier(self.backbone(x)).squeeze(1)
+    @st.cache_resource
+def load_model():
+    from huggingface_hub import hf_hub_download
+
+    class DeepfakeDetector(nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.backbone = timm.create_model(
+                "efficientnet_b4", pretrained=False, num_classes=0
+            )
+            self.classifier = nn.Sequential(
+                nn.Dropout(0.4),
+                nn.Linear(self.backbone.num_features, 256),
+                nn.ReLU(),
+                nn.Dropout(0.2),
+                nn.Linear(256, 1)
+            )
+
+        def forward(self, x):
+            return self.classifier(self.backbone(x)).squeeze(1)
+
     device = torch.device("cpu")
     model = DeepfakeDetector().to(device)
-    model.load_state_dict(torch.load(
-        "/content/drive/MyDrive/DiplomaprojectpracticeAI/best_model_FINAL.pth",
-        map_location=device
-    ))
+
+    # ✅ загрузка модели с Hugging Face
+    model_path = hf_hub_download(
+        repo_id="Bekarys011/deepshield-model",
+        filename="best_model_FINAL.pth"
+    )
+
+    model.load_state_dict(torch.load(model_path, map_location=device))
+
     model.eval()
     return model, device
 transform = transforms.Compose([
