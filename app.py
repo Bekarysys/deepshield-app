@@ -143,8 +143,8 @@ with left:
     uploaded = st.file_uploader("Upload image", type=["jpg", "png", "jpeg"])
 
     if uploaded:
-    image = Image.open(uploaded).convert("RGB")
-    st.image(image, use_container_width=True)
+        image = Image.open(uploaded).convert("RGB")
+        st.image(image, use_container_width=True)
 
     with st.spinner("Analyzing..."):
         model, device = load_model()
