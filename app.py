@@ -143,33 +143,31 @@ with left:
     uploaded = st.file_uploader("Upload image", type=["jpg", "png", "jpeg"])
 
     if uploaded:
-        image = Image.open(uploaded).convert("RGB")
-        st.image(image, use_container_width=True)
+    image = Image.open(uploaded).convert("RGB")
+    st.image(image, use_container_width=True)
 
-with right:
-    if uploaded:
-        with st.spinner("Analyzing..."):
-            model, device = load_model()
-            tensor = transform(image).unsqueeze(0).to(device)
+    with st.spinner("Analyzing..."):
+        model, device = load_model()
+        tensor = transform(image).unsqueeze(0).to(device)
 
-            with torch.no_grad():
-                prob = torch.sigmoid(model(tensor)).item()
+        with torch.no_grad():
+            prob = torch.sigmoid(model(tensor)).item()
 
-        is_fake = prob > 0.5
-        confidence = prob if is_fake else 1 - prob
+    is_fake = prob > 0.5
+    confidence = prob if is_fake else 1 - prob
 
-        if is_fake:
-            st.error(f"FAKE ({confidence:.1%})")
-            explanations = random.choice(FAKE_EXPLANATIONS)
-        else:
-            st.success(f"REAL ({confidence:.1%})")
-            explanations = random.choice(REAL_EXPLANATIONS)
+    if is_fake:
+        st.error(f"FAKE ({confidence:.1%})")
+        explanations = random.choice(FAKE_EXPLANATIONS)
+    else:
+        st.success(f"REAL ({confidence:.1%})")
+        explanations = random.choice(REAL_EXPLANATIONS)
 
-        for e in explanations:
-            st.write("- " + e)
+    for e in explanations:
+        st.write("- " + e)
+
 else:
     st.info("Upload image to start")
-```
 
 st.markdown("---")
 st.markdown("DeepShield · AITU · 2025")
