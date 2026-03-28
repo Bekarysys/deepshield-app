@@ -62,7 +62,7 @@ FAKE_EXPLANATIONS = [
 
 @st.cache_resource
 def load_model():
-from huggingface_hub import hf_hub_download
+    from huggingface_hub import hf_hub_download
 
 class DeepfakeDetector(nn.Module):
     def __init__(self):
