@@ -96,8 +96,6 @@ return model, device
 
 
 
-    def forward(self, x):
-        return self.classifier(self.backbone(x)).squeeze(1)
 
 device = torch.device("cpu")
 model = DeepfakeDetector().to(device)
