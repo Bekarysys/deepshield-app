@@ -62,8 +62,8 @@ FAKE_EXPLANATIONS = [
 
 @st.cache_resource
 def load_model():
+from huggingface_hub import hf_hub_download
 
-```
 class DeepfakeDetector(nn.Module):
     def __init__(self):
         super().__init__()
@@ -77,6 +77,24 @@ class DeepfakeDetector(nn.Module):
             nn.Dropout(0.2),
             nn.Linear(256, 1)
         )
+
+    def forward(self, x):
+        return self.classifier(self.backbone(x)).squeeze(1)
+
+device = torch.device("cpu")
+model = DeepfakeDetector().to(device)
+
+model_path = hf_hub_download(
+    repo_id="Bekarys011/deepshield-model",
+    filename="best_model_FINAL.pth"
+)
+
+model.load_state_dict(torch.load(model_path, map_location=device))
+model.eval()
+
+return model, device
+
+
 
     def forward(self, x):
         return self.classifier(self.backbone(x)).squeeze(1)
