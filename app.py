@@ -124,16 +124,16 @@ st.markdown("---")
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-st.markdown('<div class="metric-card"><h3>99.92%</h3><p>Accuracy</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="metric-card"><h3>99.92%</h3><p>Accuracy</p></div>', unsafe_allow_html=True)
 
 with col2:
-st.markdown('<div class="metric-card"><h3>1.000</h3><p>AUC</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="metric-card"><h3>1.000</h3><p>AUC</p></div>', unsafe_allow_html=True)
 
 with col3:
-st.markdown('<div class="metric-card"><h3>140k</h3><p>Images</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="metric-card"><h3>140k</h3><p>Images</p></div>', unsafe_allow_html=True)
 
 with col4:
-st.markdown('<div class="metric-card"><h3>10</h3><p>Epochs</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="metric-card"><h3>10</h3><p>Epochs</p></div>', unsafe_allow_html=True)
 
 st.markdown("---")
 
