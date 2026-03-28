@@ -140,15 +140,17 @@ st.markdown("---")
 left, right = st.columns(2)
 
 with left:
-    uploaded = st.file_uploader("Upload image", type=["jpg", "png", "jpeg"])
+uploaded = st.file_uploader("Upload image", type=["jpg", "png", "jpeg"])
 
-    if uploaded:
-        image = Image.open(uploaded).convert("RGB")
-        st.image(image, use_container_width=True)
+if uploaded:
+    image = Image.open(uploaded).convert("RGB")
+    st.image(image, use_container_width=True)
 
-    with st.spinner("Analyzing..."):
-        model, device = load_model()
-        tensor = transform(image).unsqueeze(0).to(device)
+with right:
+if uploaded:
+with st.spinner("Analyzing..."):
+model, device = load_model()
+tensor = transform(image).unsqueeze(0).to(device)
 
         with torch.no_grad():
             prob = torch.sigmoid(model(tensor)).item()
@@ -168,6 +170,7 @@ with left:
 
 else:
     st.info("Upload image to start")
+
 
 st.markdown("---")
 st.markdown("DeepShield · AITU · 2025")
