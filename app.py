@@ -14,7 +14,7 @@ st.set_page_config(
     layout="wide"
 )
 mtcnn_test = MTCNN(keep_all=True, device='cpu')
-print("MTCNN loaded successfully")
+st.success("MTCNN initialized successfully")
 
 st.markdown("""
 <style>
