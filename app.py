@@ -6,12 +6,15 @@ from PIL import Image
 import timm
 import random
 from huggingface_hub import hf_hub_download
+from facenet_pytorch import MTCNN
 
 st.set_page_config(
     page_title="DeepShield",
     page_icon="🛡️",
     layout="wide"
 )
+mtcnn_test = MTCNN(keep_all=True, device='cpu')
+print("MTCNN loaded successfully")
 
 st.markdown("""
 <style>
