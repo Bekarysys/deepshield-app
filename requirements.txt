@@ -4,3 +4,6 @@ torchvision
 timm
 Pillow
 huggingface_hub
+facenet-pytorch
+opencv-python-headless
+numpy
