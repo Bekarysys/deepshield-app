@@ -5,8 +5,9 @@ from torchvision import transforms
 from PIL import Image
 import timm
 import random
+import cv2
+import numpy as np
 from huggingface_hub import hf_hub_download
-from facenet_pytorch import MTCNN
 
 st.set_page_config(
     page_title="DeepShield",
@@ -123,32 +124,36 @@ def load_model():
     model.eval()
     return model, device
 
-@st.cache_resource
-def load_mtcnn():
-    return MTCNN(
-        keep_all=False,
-        device='cpu'
-    )
-
+face_cascade = cv2.CascadeClassifier(
+    cv2.data.haarcascades +
+    'haarcascade_frontalface_default.xml'
+)
 
 def extract_face(image):
-    mtcnn = load_mtcnn()
+    img_np = np.array(image)
 
-    boxes, probs = mtcnn.detect(image)
+    gray = cv2.cvtColor(img_np, cv2.COLOR_RGB2GRAY)
 
-    if boxes is None or len(boxes) == 0:
-        return None
-
-    largest_box = max(
-        boxes,
-        key=lambda b: (b[2] - b[0]) * (b[3] - b[1])
+    faces = face_cascade.detectMultiScale(
+        gray,
+        scaleFactor=1.1,
+        minNeighbors=5,
+        minSize=(60, 60)
     )
 
-    x1, y1, x2, y2 = map(int, largest_box)
+    if len(faces) == 0:
+        return None
 
-    face = image.crop((x1, y1, x2, y2))
+    largest_face = max(
+        faces,
+        key=lambda f: f[2] * f[3]
+    )
 
-    return face
+    x, y, w, h = largest_face
+
+    face = img_np[y:y+h, x:x+w]
+
+    return Image.fromarray(face)
 # ================= TRANSFORM =================
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
