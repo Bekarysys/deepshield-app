@@ -125,7 +125,33 @@ def load_model():
     model.eval()
     return model, device
 
+@st.cache_resource
+def load_mtcnn():
+    return MTCNN(
+        keep_all=True,
+        device='cpu'
+    )
 
+
+def extract_face(image):
+    mtcnn = load_mtcnn()
+
+    boxes, _ = mtcnn.detect(image)
+
+    if boxes is None:
+        return None
+
+    # largest face
+    largest_box = max(
+        boxes,
+        key=lambda b: (b[2] - b[0]) * (b[3] - b[1])
+    )
+
+    x1, y1, x2, y2 = map(int, largest_box)
+
+    face = image.crop((x1, y1, x2, y2))
+
+    return face
 # ================= TRANSFORM =================
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
@@ -163,6 +189,14 @@ with left:
     )
     if uploaded:
         image = Image.open(uploaded).convert("RGB")
+
+face = extract_face(image)
+
+if face is None:
+    st.error("No face detected in image")
+    st.stop()
+
+image = face
         st.image(image, caption="Uploaded Image", use_container_width=True)
 
 with right:
