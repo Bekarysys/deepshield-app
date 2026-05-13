@@ -4,5 +4,5 @@ torchvision
 timm
 Pillow
 huggingface_hub
-opencv-python-headless==4.8.1.78
+opencv-python-headless==4.10.0.84
 numpy==1.26.4
