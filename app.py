@@ -13,8 +13,6 @@ st.set_page_config(
     page_icon="🛡️",
     layout="wide"
 )
-mtcnn_test = MTCNN(keep_all=True, device='cpu')
-st.success("MTCNN initialized successfully")
 
 st.markdown("""
 <style>
@@ -128,7 +126,7 @@ def load_model():
 @st.cache_resource
 def load_mtcnn():
     return MTCNN(
-        keep_all=True,
+        keep_all=False,
         device='cpu'
     )
 
@@ -136,12 +134,11 @@ def load_mtcnn():
 def extract_face(image):
     mtcnn = load_mtcnn()
 
-    boxes, _ = mtcnn.detect(image)
+    boxes, probs = mtcnn.detect(image)
 
-    if boxes is None:
+    if boxes is None or len(boxes) == 0:
         return None
 
-    # largest face
     largest_box = max(
         boxes,
         key=lambda b: (b[2] - b[0]) * (b[3] - b[1])
