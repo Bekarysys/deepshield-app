@@ -182,22 +182,28 @@ left, right = st.columns(2)
 
 with left:
     st.markdown("### Upload Image")
+
     uploaded = st.file_uploader(
         "Choose an image file",
         type=["jpg", "jpeg", "png"],
         help="Upload a face image to check if it is real or deepfake"
     )
+
     if uploaded:
         image = Image.open(uploaded).convert("RGB")
+        face = extract_face(image)
 
-face = extract_face(image)
+        if face is None:
+            st.error("No face detected in image")
+            st.stop()
 
-if face is None:
-    st.error("No face detected in image")
-    st.stop()
+        image = face
 
-image = face
-        st.image(image, caption="Uploaded Image", use_container_width=True)
+        st.image(
+            image,
+            caption="Detected Face",
+            use_container_width=True
+        )
 
 with right:
     st.markdown("### Analysis Result")
