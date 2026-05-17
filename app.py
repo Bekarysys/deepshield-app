@@ -145,16 +145,9 @@ def extract_face(image):
     return Image.fromarray(face)
 # CONFIDENCE CALIBRATION 
 def calibrate_confidence(raw_prob):
-    """Calibrate confidence for realistic scores (70-95%)"""
-    if raw_prob < 0.5:
-        calibrated = 0.70 + (0.5 - raw_prob) * 0.5
-    else:
-        calibrated = 0.70 + (raw_prob - 0.5) * 0.5
-    return np.clip(calibrated, 0.50, 0.95)
-def add_confidence_noise(confidence, noise_level=0.02):
-    """Add small noise for realism"""
-    noise = np.random.uniform(-noise_level, noise_level)
-    return np.clip(confidence + noise, 0.50, 0.95)
+    return raw_prob
+def add_confidence_noise(confidence):
+    return confidence
 # VIDEO PROCESSING
 def extract_video_frames(video_file, max_frames=20, frame_interval=5):
     """Extract frames from video"""
