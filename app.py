@@ -197,7 +197,7 @@ def analyze_video_frames(frames, model, device):
 
         real_confidence = 1 - fake_confidence
 
-        is_fake = raw_prob > 0.5
+        is_fake = fake_confidence > real_confidence
 
         display_confidence = (
             fake_confidence if is_fake
@@ -286,7 +286,7 @@ with tab1:
             
             real_confidence = 1 - fake_confidence
             
-            is_fake = raw_prob > 0.5
+            is_fake = fake_confidence > real_confidence
             
             display_confidence = (
                 fake_confidence if is_fake
@@ -383,7 +383,7 @@ with tab2:
                 
                 real_confidence = 1 - fake_confidence
                 
-                is_fake = raw_prob > 0.5
+                is_fake = fake_confidence > real_confidence
                 
                 display_confidence = (
                     fake_confidence if is_fake
