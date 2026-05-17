@@ -192,14 +192,22 @@ def analyze_video_frames(frames, model, device):
         tensor = transform(face).unsqueeze(0).to(device)
         with torch.no_grad():
             raw_prob = torch.sigmoid(model(tensor)).item()
-        prob = calibrate_confidence(raw_prob)
-        prob = add_confidence_noise(prob)
+        fake_confidence = calibrate_confidence(raw_prob)
+        fake_confidence = add_confidence_noise(fake_confidence)
+
+        real_confidence = 1 - fake_confidence
+
         is_fake = raw_prob > 0.5
-        confidence = prob if is_fake else 1 - prob
+
+        display_confidence = (
+            fake_confidence if is_fake
+            else real_confidence
+)
+       
         results.append({
             "Frame": f"Frame {frame_idx+1}",
             "Result": "DEEPFAKE" if is_fake else "REAL",
-            "Confidence": f"{confidence:.1%}"
+            "Confidence": f"{display_confidence:.1%}"
         })
     return results
 # TRANSFORM 
@@ -272,22 +280,30 @@ with tab1:
                 tensor = transform(image).unsqueeze(0).to(device)
                 with torch.no_grad():
                     raw_prob = torch.sigmoid(model(tensor)).item()
-            # Calibration
-            prob = calibrate_confidence(raw_prob)
-            prob = add_confidence_noise(prob)
+            # Confidence calculation
+            fake_confidence = calibrate_confidence(raw_prob)
+            fake_confidence = add_confidence_noise(fake_confidence)
+            
+            real_confidence = 1 - fake_confidence
+            
             is_fake = raw_prob > 0.5
-            confidence = prob if is_fake else 1 - prob
+            
+            display_confidence = (
+                fake_confidence if is_fake
+                else real_confidence
+            )
+            
             if is_fake:
                 st.markdown(f"""
                 <div class="result-fake">
                     <h2 style="color:#A32D2D;margin:0;">⚠️ DEEPFAKE DETECTED</h2>
                     <p style="color:#791F1F;margin:4px 0;">This image appears to be synthetically generated</p>
-                    <h1 style="color:#E24B4A;margin:8px 0;">{confidence:.1%}</h1>
+                    <h1 style="color:#E24B4A;margin:8px 0;">{display_confidence:.1%}</h1>
                     <p style="color:#94A3B8;font-size:12px;margin:0;"><strong>Confidence Score</strong></p>
                     <p style="color:#C9302C;font-size:11px;margin:8px 0;">GAN artifacts and frequency anomalies detected</p>
                 </div>
                 """, unsafe_allow_html=True)
-                st.progress(confidence)
+                st.progress(display_confidence)
                 explanations = random.choice(FAKE_EXPLANATIONS)
                 items_html = "".join([f'<div class="explain-item">⚠️ {e}</div>' for e in explanations])
                 st.markdown(f"""
@@ -301,12 +317,12 @@ with tab1:
                 <div class="result-real">
                     <h2 style="color:#27500A;margin:0;">✅ REAL IMAGE</h2>
                     <p style="color:#3B6D11;margin:4px 0;">This image appears to be authentic</p>
-                    <h1 style="color:#639922;margin:8px 0;">{confidence:.1%}</h1>
+                    <h1 style="color:#639922;margin:8px 0;">{display_confidence:.1%}</h1>
                     <p style="color:#94A3B8;font-size:12px;margin:0;"><strong>Confidence Score</strong></p>
                     <p style="color:#559D0E;font-size:11px;margin:8px 0;">No deepfake artifacts detected</p>
                 </div>
                 """, unsafe_allow_html=True)
-                st.progress(confidence)
+                st.progress(display_confidence)
                 explanations = random.choice(REAL_EXPLANATIONS)
                 items_html = "".join([f'<div class="explain-item">✅ {e}</div>' for e in explanations])
                 st.markdown(f"""
@@ -318,9 +334,15 @@ with tab1:
             st.markdown("---")
             d1, d2 = st.columns(2)
             with d1:
-                st.metric("Real probability", f"{(1 - prob):.1%}")
+                st.metric(
+    "Real probability",
+    f"{real_confidence:.1%}"
+)
             with d2:
-                st.metric("Fake probability", f"{prob:.1%}")
+               st.metric(
+    "Fake probability",
+    f"{fake_confidence:.1%}"
+)
         else:
             st.info("👆 Upload an image on the left to start analysis")
 #  TAB 2: BATCH IMAGES 
@@ -352,17 +374,32 @@ with tab2:
                     progress_bar.progress((idx + 1) / len(uploaded_files))
                     continue
                 tensor = transform(face).unsqueeze(0).to(device)
+
                 with torch.no_grad():
                     raw_prob = torch.sigmoid(model(tensor)).item()
-                prob = calibrate_confidence(raw_prob)
-                prob = add_confidence_noise(prob)
+                
+                fake_confidence = calibrate_confidence(raw_prob)
+                fake_confidence = add_confidence_noise(fake_confidence)
+                
+                real_confidence = 1 - fake_confidence
+                
                 is_fake = raw_prob > 0.5
-                confidence = prob if is_fake else 1 - prob
-                result_text = "🚨 DEEPFAKE" if is_fake else "✅ REAL"
+                
+                display_confidence = (
+                    fake_confidence if is_fake
+                    else real_confidence
+                )
+                
+                result_text = (
+                    "🚨 DEEPFAKE"
+                    if is_fake
+                    else "✅ REAL"
+                )
+                
                 results_list.append({
                     "Filename": uploaded_file.name,
                     "Result": result_text,
-                    "Confidence": f"{confidence:.1%}",
+                    "Confidence": f"{display_confidence:.1%}",
                 })
                 progress_bar.progress((idx + 1) / len(uploaded_files))
             status_text.empty()
