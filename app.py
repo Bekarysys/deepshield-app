@@ -218,7 +218,7 @@ st.markdown("""
 <div style="background: #F0F7FF; border-left: 4px solid #1A56DB; padding: 12px; border-radius: 4px; margin-bottom: 16px;">
     <p style="margin: 0; font-size: 13px; color: #1E293B;">
         <strong>ℹ️ Model Info:</strong> EfficientNet-B4 Transfer Learning | Pre-trained ImageNet-1k | 
-        EfficientNet-B4 Transfer Learning | Pre-trained on ImageNet-1K | Fine-tuned on ~42,000 real and AI-generated face images (FFHQ, CelebA, StyleGAN, CIFAKE)
+         Fine-tuned on ~42,000 real and AI-generated face images (FFHQ, CelebA, StyleGAN, CIFAKE)
     </p>
 </div>
 """, unsafe_allow_html=True)
