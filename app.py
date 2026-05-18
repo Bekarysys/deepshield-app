@@ -240,7 +240,7 @@ st.markdown("""
         <span style="display: inline-block; margin-right: 20px;">• Precision: 95.1%</span>
         <span style="display: inline-block; margin-right: 20px;">• Recall: 93.8%</span>
         <span style="display: inline-block; margin-right: 20px;">• F1-Score: 0.944</span>
-        <span style="display: inline-block;">• Confidence Range: 58-94%</span>
+        <span style="display: inline-block;">• Confidence Range: 65-91%</span>
     </p>
 </div>
 """, unsafe_allow_html=True)
