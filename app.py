@@ -218,18 +218,18 @@ st.markdown("""
 <div style="background: #F0F7FF; border-left: 4px solid #1A56DB; padding: 12px; border-radius: 4px; margin-bottom: 16px;">
     <p style="margin: 0; font-size: 13px; color: #1E293B;">
         <strong>ℹ️ Model Info:</strong> EfficientNet-B4 Transfer Learning | Pre-trained ImageNet-1k | 
-        Fine-tuned on 140,000 face images (50% Real FFHQ, 50% AI StyleGAN)
+        EfficientNet-B4 Transfer Learning | Pre-trained on ImageNet-1K | Fine-tuned on ~42,000 real and AI-generated face images (FFHQ, CelebA, StyleGAN, CIFAKE)
     </p>
 </div>
 """, unsafe_allow_html=True)
 #  METRICS 
 col1, col2, col3, col4 = st.columns(4)
 with col1:
-    st.markdown('<div class="metric-card"><h3 style="color:#1A56DB;margin:0;">97.5%</h3><p style="color:#94A3B8;margin:0;font-size:12px;">Model Accuracy</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="metric-card"><h3 style="color:#1A56DB;margin:0;">94.3%</h3><p style="color:#94A3B8;margin:0;font-size:12px;">Model Accuracy</p></div>', unsafe_allow_html=True)
 with col2:
-    st.markdown('<div class="metric-card"><h3 style="color:#639922;margin:0;">0.985</h3><p style="color:#94A3B8;margin:0;font-size:12px;">AUC-ROC Score</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="metric-card"><h3 style="color:#639922;margin:0;">0.962</h3><p style="color:#94A3B8;margin:0;font-size:12px;">AUC-ROC Score</p></div>', unsafe_allow_html=True)
 with col3:
-    st.markdown('<div class="metric-card"><h3 style="color:#1E293B;margin:0;">140k</h3><p style="color:#94A3B8;margin:0;font-size:12px;">Training Images</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="metric-card"><h3 style="color:#1E293B;margin:0;">42k</h3><p style="color:#94A3B8;margin:0;font-size:12px;">Training Images</p></div>', unsafe_allow_html=True)
 with col4:
     st.markdown('<div class="metric-card"><h3 style="color:#534AB7;margin:0;">B4</h3><p style="color:#94A3B8;margin:0;font-size:12px;">EfficientNet</p></div>', unsafe_allow_html=True)
 # PERFORMANCE METRICS
@@ -237,10 +237,10 @@ st.markdown("""
 <div style="background: #F8FAFF; border: 1px solid #E2E8F0; padding: 14px; border-radius: 8px; margin-bottom: 16px;">
     <p style="margin: 0; font-size: 12px; color: #475569;">
         <strong>📊 Validation Performance:</strong><br>
-        <span style="display: inline-block; margin-right: 20px;">• Precision: 98.2%</span>
-        <span style="display: inline-block; margin-right: 20px;">• Recall: 97.5%</span>
-        <span style="display: inline-block; margin-right: 20px;">• F1-Score: 0.977</span>
-        <span style="display: inline-block;">• Confidence Range: 50-95%</span>
+        <span style="display: inline-block; margin-right: 20px;">• Precision: 95.1%</span>
+        <span style="display: inline-block; margin-right: 20px;">• Recall: 93.8%</span>
+        <span style="display: inline-block; margin-right: 20px;">• F1-Score: 0.944</span>
+        <span style="display: inline-block;">• Confidence Range: 58-94%</span>
     </p>
 </div>
 """, unsafe_allow_html=True)
@@ -508,10 +508,10 @@ st.markdown("""
         Bekarys Sapash & Zhandos Aliakbar | AITU Cybersecurity 2025
     </p>
     <p style="margin: 8px 0; font-size: 11px; color: #94A3B8;">
-        EfficientNet-B4 Transfer Learning | Accuracy 97.5% | AUC-ROC 0.985
+        EfficientNet-B4 Transfer Learning | Accuracy 94.3% | AUC-ROC 0.962
     </p>
     <p style="margin: 8px 0; font-size: 10px; color: #CBD5E1;">
-        Trained on 140,000 face images | 10 epochs | Batch size 32 | Learning rate 1e-4
+        Fine-tuned on ~42,000 real and AI-generated face images | 10 epochs | Batch size 32 | Learning rate 1e-4
     </p>
 </div>
 """, unsafe_allow_html=True)
