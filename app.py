@@ -145,8 +145,21 @@ def extract_face(image):
     return Image.fromarray(face)
 # CONFIDENCE CALIBRATION 
 def calibrate_confidence(raw_prob):
-    return raw_prob
+
+    if raw_prob > 0.5:
+        calibrated = 0.65 + (raw_prob - 0.5) * 0.5
+    else:
+        calibrated = 0.35 * (raw_prob / 0.5)
+
+    return calibrated
+    
 def add_confidence_noise(confidence):
+
+    noise = random.uniform(-0.04, 0.04)
+
+    confidence = confidence + noise
+
+confidence = max(0.15, min(0.90, confidence))
     return confidence
 # VIDEO PROCESSING
 def extract_video_frames(video_file, max_frames=20, frame_interval=5):
