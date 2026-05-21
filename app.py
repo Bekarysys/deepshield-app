@@ -159,7 +159,7 @@ def add_confidence_noise(confidence):
 
     confidence = confidence + noise
 
-confidence = max(0.15, min(0.90, confidence))
+    confidence = max(0.15, min(0.90, confidence))
     return confidence
 # VIDEO PROCESSING
 def extract_video_frames(video_file, max_frames=20, frame_interval=5):
