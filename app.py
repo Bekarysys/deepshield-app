@@ -376,7 +376,7 @@ with tab1:
                     {items_html}
                 </div>
                 """, unsafe_allow_html=True)
-            else:
+         else:
                 st.markdown(f"""
                 <div class="result-real">
                     <h2 style="color:#27500A;margin:0;">✅ REAL IMAGE</h2>
@@ -397,7 +397,7 @@ with tab1:
                 """, unsafe_allow_html=True)
             st.markdown("---")
             d1, d2 = st.columns(2)
-            with d1:
+        with d1:
                 st.metric(
     "Real probability",
     f"{real_confidence:.1%}"
