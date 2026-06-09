@@ -208,7 +208,8 @@ def analyze_video_frames(frames, model, device):
     """Analyze all frames from video"""
     results = []
     for frame_idx, frame in enumerate(frames):
-                if DEMO_MODE:
+        
+         if DEMO_MODE:
 
             demo_results = [
                 ("REAL", "92%"),
@@ -229,7 +230,9 @@ def analyze_video_frames(frames, model, device):
             })
 
             continue
+
         face = extract_face(frame)
+
         if face is None:
             results.append({
                 "Frame": f"Frame {frame_idx+1}",
@@ -237,6 +240,7 @@ def analyze_video_frames(frames, model, device):
                 "Confidence": "—"
             })
             continue
+            
         tensor = transform(face).unsqueeze(0).to(device)
         with torch.no_grad():
             raw_prob = torch.sigmoid(model(tensor)).item()
