@@ -330,85 +330,81 @@ with tab1:
             image = face
             st.image(image, caption="Detected Face", use_column_width=True)
     with right:
-        st.markdown("### Analysis Result")
-        if uploaded:
 
-           with st.spinner("🔄 Analyzing image..."):
+    st.markdown("### Analysis Result")
 
-                model, device = load_model()
-                tensor = transform(image).unsqueeze(0).to(device)
+    if uploaded:
 
-        if DEMO_MODE:
+        with st.spinner("🔄 Analyzing image..."):
 
-            is_fake, real_confidence, fake_confidence = get_demo_prediction()
+            model, device = load_model()
+            tensor = transform(image).unsqueeze(0).to(device)
 
-        else:
+            if DEMO_MODE:
 
-            with torch.no_grad():
-                raw_prob = torch.sigmoid(model(tensor)).item()
+                is_fake, real_confidence, fake_confidence = get_demo_prediction()
 
-            fake_confidence = calibrate_confidence(raw_prob)
-            fake_confidence = add_confidence_noise(fake_confidence)
+            else:
 
-            real_confidence = 1 - fake_confidence
+                with torch.no_grad():
+                    raw_prob = torch.sigmoid(model(tensor)).item()
 
-            is_fake = fake_confidence > real_confidence
+                fake_confidence = calibrate_confidence(raw_prob)
+                fake_confidence = add_confidence_noise(fake_confidence)
 
-        display_confidence = fake_confidence if is_fake else real_confidence
-                
-            
+                real_confidence = 1 - fake_confidence
+
+                is_fake = fake_confidence > real_confidence
+
+            display_confidence = (
+                fake_confidence if is_fake
+                else real_confidence
+            )
+
         if is_fake:
-                st.markdown(f"""
-                <div class="result-fake">
-                    <h2 style="color:#A32D2D;margin:0;">⚠️ DEEPFAKE DETECTED</h2>
-                    <p style="color:#791F1F;margin:4px 0;">This image appears to be synthetically generated</p>
-                    <h1 style="color:#E24B4A;margin:8px 0;">{display_confidence:.1%}</h1>
-                    <p style="color:#94A3B8;font-size:12px;margin:0;"><strong>Confidence Score</strong></p>
-                    <p style="color:#C9302C;font-size:11px;margin:8px 0;">GAN artifacts and frequency anomalies detected</p>
-                </div>
-                """, unsafe_allow_html=True)
-                st.progress(display_confidence)
-                explanations = random.choice(FAKE_EXPLANATIONS)
-                items_html = "".join([f'<div class="explain-item">⚠️ {e}</div>' for e in explanations])
-                st.markdown(f"""
-                <div class="explain-box">
-                    <div class="explain-title">Why this image is classified as DEEPFAKE:</div>
-                    {items_html}
-                </div>
-                """, unsafe_allow_html=True)
-         else:
-                st.markdown(f"""
-                <div class="result-real">
-                    <h2 style="color:#27500A;margin:0;">✅ REAL IMAGE</h2>
-                    <p style="color:#3B6D11;margin:4px 0;">This image appears to be authentic</p>
-                    <h1 style="color:#639922;margin:8px 0;">{display_confidence:.1%}</h1>
-                    <p style="color:#94A3B8;font-size:12px;margin:0;"><strong>Confidence Score</strong></p>
-                    <p style="color:#559D0E;font-size:11px;margin:8px 0;">No deepfake artifacts detected</p>
-                </div>
-                """, unsafe_allow_html=True)
-                st.progress(display_confidence)
-                explanations = random.choice(REAL_EXPLANATIONS)
-                items_html = "".join([f'<div class="explain-item">✅ {e}</div>' for e in explanations])
-                st.markdown(f"""
-                <div class="explain-box">
-                    <div class="explain-title">Why this image is classified as REAL:</div>
-                    {items_html}
-                </div>
-                """, unsafe_allow_html=True)
-            st.markdown("---")
-            d1, d2 = st.columns(2)
-        with d1:
-                st.metric(
-    "Real probability",
-    f"{real_confidence:.1%}"
-)
-            with d2:
-               st.metric(
-    "Fake probability",
-    f"{fake_confidence:.1%}"
-)
+
+            st.markdown(f"""
+            <div class="result-fake">
+                <h2 style="color:#A32D2D;margin:0;">⚠️ DEEPFAKE DETECTED</h2>
+                <p style="color:#791F1F;margin:4px 0;">This image appears to be synthetically generated</p>
+                <h1 style="color:#E24B4A;margin:8px 0;">{display_confidence:.1%}</h1>
+                <p style="color:#94A3B8;font-size:12px;margin:0;"><strong>Confidence Score</strong></p>
+            </div>
+            """, unsafe_allow_html=True)
+
+            st.progress(display_confidence)
+
         else:
-            st.info("👆 Upload an image on the left to start analysis")
+
+            st.markdown(f"""
+            <div class="result-real">
+                <h2 style="color:#27500A;margin:0;">✅ REAL IMAGE</h2>
+                <p style="color:#3B6D11;margin:4px 0;">This image appears to be authentic</p>
+                <h1 style="color:#639922;margin:8px 0;">{display_confidence:.1%}</h1>
+                <p style="color:#94A3B8;font-size:12px;margin:0;"><strong>Confidence Score</strong></p>
+            </div>
+            """, unsafe_allow_html=True)
+
+            st.progress(display_confidence)
+
+        st.markdown("---")
+
+        d1, d2 = st.columns(2)
+
+        with d1:
+            st.metric(
+                "Real probability",
+                f"{real_confidence:.1%}"
+            )
+
+        with d2:
+            st.metric(
+                "Fake probability",
+                f"{fake_confidence:.1%}"
+            )
+
+    else:
+        st.info("👆 Upload an image on the left to start analysis")
 #  TAB 2: BATCH IMAGES 
 with tab2:
     st.markdown("### Upload Multiple Images")
