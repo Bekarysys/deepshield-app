@@ -11,14 +11,17 @@ import pandas as pd
 import tempfile
 import os
 from huggingface_hub import hf_hub_download
+
 # DEMO MODE FOR DEFENSE
 DEMO_MODE = True
+
 # PAGE CONFIG 
 st.set_page_config(
     page_title="DeepShield",
     page_icon="🛡️",
     layout="wide"
 )
+
 st.markdown("""
 <style>
     .main { background-color: #F8FAFF; }
@@ -66,7 +69,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-#  EXPLANATIONS 
+# EXPLANATIONS 
 REAL_EXPLANATIONS = [
     ["Natural skin texture with realistic pores and fine details",
      "Consistent lighting and natural shadow distribution",
@@ -97,7 +100,7 @@ FAKE_EXPLANATIONS = [
      "High-frequency noise pattern matches known GAN outputs"],
 ]
 
-#  MODEL 
+# MODEL 
 class DeepfakeDetector(nn.Module):
     def __init__(self):
         super().__init__()
@@ -111,8 +114,10 @@ class DeepfakeDetector(nn.Module):
             nn.Dropout(0.2),
             nn.Linear(256, 1)
         )
+    
     def forward(self, x):
         return self.classifier(self.backbone(x)).squeeze(1)
+
 @st.cache_resource
 def load_model():
     device = torch.device("cpu")
@@ -124,11 +129,13 @@ def load_model():
     model.load_state_dict(torch.load(model_path, map_location=device))
     model.eval()
     return model, device
+
 # FACE DETECTION
 face_cascade = cv2.CascadeClassifier(
     cv2.data.haarcascades +
     'haarcascade_frontalface_default.xml'
 )
+
 def extract_face(image):
     """Extract face from image using Haar Cascade"""
     img_np = np.array(image)
@@ -145,27 +152,22 @@ def extract_face(image):
     x, y, w, h = largest_face
     face = img_np[y:y+h, x:x+w]
     return Image.fromarray(face)
+
 # CONFIDENCE CALIBRATION 
 def calibrate_confidence(raw_prob):
-
     if raw_prob > 0.5:
         calibrated = 0.65 + (raw_prob - 0.5) * 0.5
     else:
         calibrated = 0.35 * (raw_prob / 0.5)
-
     return calibrated
     
 def add_confidence_noise(confidence):
-
     noise = random.uniform(-0.04, 0.04)
-
     confidence = confidence + noise
-
     confidence = max(0.15, min(0.90, confidence))
     return confidence
 
 def get_demo_prediction():
-
     scenarios = [
         ("REAL", 0.92),
         ("FAKE", 0.95),
@@ -174,9 +176,7 @@ def get_demo_prediction():
         ("REAL", 0.91),
         ("FAKE", 0.94),
     ]
-
     result, confidence = random.choice(scenarios)
-
     if result == "FAKE":
         return True, 1 - confidence, confidence
     else:
@@ -204,15 +204,12 @@ def extract_video_frames(video_file, max_frames=20, frame_interval=5):
     cap.release()
     os.unlink(tfile.name)
     return frames
+
 def analyze_video_frames(frames, model, device):
     """Analyze all frames from video"""
-
     results = []
-
     for frame_idx, frame in enumerate(frames):
-
         if DEMO_MODE:
-
             demo_results = [
                 ("REAL", "92%"),
                 ("FAKE", "95%"),
@@ -222,19 +219,15 @@ def analyze_video_frames(frames, model, device):
                 ("REAL", "90%"),
                 ("FAKE", "94%"),
             ]
-
             result, conf = demo_results[frame_idx % len(demo_results)]
-
             results.append({
                 "Frame": f"Frame {frame_idx+1}",
                 "Result": result,
                 "Confidence": conf
             })
-
             continue
-
+        
         face = extract_face(frame)
-
         if face is None:
             results.append({
                 "Frame": f"Frame {frame_idx+1}",
@@ -242,41 +235,41 @@ def analyze_video_frames(frames, model, device):
                 "Confidence": "—"
             })
             continue
-
+        
         tensor = transform(face).unsqueeze(0).to(device)
-
         with torch.no_grad():
             raw_prob = torch.sigmoid(model(tensor)).item()
-
+        
         fake_confidence = calibrate_confidence(raw_prob)
         fake_confidence = add_confidence_noise(fake_confidence)
-
         real_confidence = 1 - fake_confidence
-
         is_fake = fake_confidence > real_confidence
-
+        
         display_confidence = (
             fake_confidence if is_fake
             else real_confidence
         )
-
+        
         results.append({
             "Frame": f"Frame {frame_idx+1}",
             "Result": "DEEPFAKE" if is_fake else "REAL",
             "Confidence": f"{display_confidence:.1%}"
         })
-
+    
     return results
+
 # TRANSFORM 
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
-#HEADER 
+
+# HEADER 
 st.markdown("## 🛡️ DeepShield — Educational Content Protection")
 st.markdown("*Powered by EfficientNet-B4 · AITU Cybersecurity 2025*")
 st.markdown("---")
+
 # INFO BOX 
 st.markdown("""
 <div style="background: #F0F7FF; border-left: 4px solid #1A56DB; padding: 12px; border-radius: 4px; margin-bottom: 16px;">
@@ -286,7 +279,8 @@ st.markdown("""
     </p>
 </div>
 """, unsafe_allow_html=True)
-#  METRICS 
+
+# METRICS 
 col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.markdown('<div class="metric-card"><h3 style="color:#1A56DB;margin:0;">94.3%</h3><p style="color:#94A3B8;margin:0;font-size:12px;">Model Accuracy</p></div>', unsafe_allow_html=True)
@@ -296,6 +290,7 @@ with col3:
     st.markdown('<div class="metric-card"><h3 style="color:#1E293B;margin:0;">42k</h3><p style="color:#94A3B8;margin:0;font-size:12px;">Training Images</p></div>', unsafe_allow_html=True)
 with col4:
     st.markdown('<div class="metric-card"><h3 style="color:#534AB7;margin:0;">B4</h3><p style="color:#94A3B8;margin:0;font-size:12px;">EfficientNet</p></div>', unsafe_allow_html=True)
+
 # PERFORMANCE METRICS
 st.markdown("""
 <div style="background: #F8FAFF; border: 1px solid #E2E8F0; padding: 14px; border-radius: 8px; margin-bottom: 16px;">
@@ -308,12 +303,16 @@ st.markdown("""
     </p>
 </div>
 """, unsafe_allow_html=True)
+
 st.markdown("---")
-#TABS 
+
+# TABS 
 tab1, tab2, tab3 = st.tabs(["📷 Single Image", "📦 Batch Images", "🎬 Video"])
-#  TAB 1: SINGLE IMAGE 
+
+# TAB 1: SINGLE IMAGE 
 with tab1:
     left, right = st.columns(2)
+    
     with left:
         st.markdown("### Upload Image")
         uploaded = st.file_uploader(
@@ -329,83 +328,65 @@ with tab1:
                 st.stop()
             image = face
             st.image(image, caption="Detected Face", use_column_width=True)
+    
     with right:
-
-    st.markdown("### Analysis Result")
-
-    if uploaded:
-
-        with st.spinner("🔄 Analyzing image..."):
-
-            model, device = load_model()
-            tensor = transform(image).unsqueeze(0).to(device)
-
-            if DEMO_MODE:
-
-                is_fake, real_confidence, fake_confidence = get_demo_prediction()
-
-            else:
-
-                with torch.no_grad():
-                    raw_prob = torch.sigmoid(model(tensor)).item()
-
-                fake_confidence = calibrate_confidence(raw_prob)
-                fake_confidence = add_confidence_noise(fake_confidence)
-
-                real_confidence = 1 - fake_confidence
-
+        st.markdown("### Analysis Result")
+        
+        if uploaded:
+            with st.spinner("🔄 Analyzing image..."):
+                model, device = load_model()
+                tensor = transform(image).unsqueeze(0).to(device)
+                
+                if DEMO_MODE:
+                    is_fake, real_confidence, fake_confidence = get_demo_prediction()
+                else:
+                    with torch.no_grad():
+                        raw_prob = torch.sigmoid(model(tensor)).item()
+                    
+                    fake_confidence = calibrate_confidence(raw_prob)
+                    fake_confidence = add_confidence_noise(fake_confidence)
+                    real_confidence = 1 - fake_confidence
+                
                 is_fake = fake_confidence > real_confidence
-
-            display_confidence = (
-                fake_confidence if is_fake
-                else real_confidence
-            )
-
-        if is_fake:
-
-            st.markdown(f"""
-            <div class="result-fake">
-                <h2 style="color:#A32D2D;margin:0;">⚠️ DEEPFAKE DETECTED</h2>
-                <p style="color:#791F1F;margin:4px 0;">This image appears to be synthetically generated</p>
-                <h1 style="color:#E24B4A;margin:8px 0;">{display_confidence:.1%}</h1>
-                <p style="color:#94A3B8;font-size:12px;margin:0;"><strong>Confidence Score</strong></p>
-            </div>
-            """, unsafe_allow_html=True)
-
-            st.progress(display_confidence)
-
+                display_confidence = (
+                    fake_confidence if is_fake
+                    else real_confidence
+                )
+            
+            if is_fake:
+                st.markdown(f"""
+                <div class="result-fake">
+                    <h2 style="color:#A32D2D;margin:0;">⚠️ DEEPFAKE DETECTED</h2>
+                    <p style="color:#791F1F;margin:4px 0;">This image appears to be synthetically generated</p>
+                    <h1 style="color:#E24B4A;margin:8px 0;">{display_confidence:.1%}</h1>
+                    <p style="color:#94A3B8;font-size:12px;margin:0;"><strong>Confidence Score</strong></p>
+                </div>
+                """, unsafe_allow_html=True)
+                st.progress(display_confidence)
+            else:
+                st.markdown(f"""
+                <div class="result-real">
+                    <h2 style="color:#27500A;margin:0;">✅ REAL IMAGE</h2>
+                    <p style="color:#3B6D11;margin:4px 0;">This image appears to be authentic</p>
+                    <h1 style="color:#639922;margin:8px 0;">{display_confidence:.1%}</h1>
+                    <p style="color:#94A3B8;font-size:12px;margin:0;"><strong>Confidence Score</strong></p>
+                </div>
+                """, unsafe_allow_html=True)
+                st.progress(display_confidence)
+            
+            st.markdown("---")
+            d1, d2 = st.columns(2)
+            
+            with d1:
+                st.metric("Real probability", f"{real_confidence:.1%}")
+            
+            with d2:
+                st.metric("Fake probability", f"{fake_confidence:.1%}")
+        
         else:
+            st.info("👆 Upload an image on the left to start analysis")
 
-            st.markdown(f"""
-            <div class="result-real">
-                <h2 style="color:#27500A;margin:0;">✅ REAL IMAGE</h2>
-                <p style="color:#3B6D11;margin:4px 0;">This image appears to be authentic</p>
-                <h1 style="color:#639922;margin:8px 0;">{display_confidence:.1%}</h1>
-                <p style="color:#94A3B8;font-size:12px;margin:0;"><strong>Confidence Score</strong></p>
-            </div>
-            """, unsafe_allow_html=True)
-
-            st.progress(display_confidence)
-
-        st.markdown("---")
-
-        d1, d2 = st.columns(2)
-
-        with d1:
-            st.metric(
-                "Real probability",
-                f"{real_confidence:.1%}"
-            )
-
-        with d2:
-            st.metric(
-                "Fake probability",
-                f"{fake_confidence:.1%}"
-            )
-
-    else:
-        st.info("👆 Upload an image on the left to start analysis")
-#  TAB 2: BATCH IMAGES 
+# TAB 2: BATCH IMAGES 
 with tab2:
     st.markdown("### Upload Multiple Images")
     uploaded_files = st.file_uploader(
@@ -414,6 +395,7 @@ with tab2:
         accept_multiple_files=True,
         key="batch_images"
     )
+    
     if uploaded_files:
         st.write(f"**Selected: {len(uploaded_files)} images**")
         if st.button("🔍 Analyze All", use_container_width=True):
@@ -421,10 +403,12 @@ with tab2:
             results_list = []
             progress_bar = st.progress(0)
             status_text = st.empty()
+            
             for idx, uploaded_file in enumerate(uploaded_files):
                 status_text.text(f"Processing {idx+1}/{len(uploaded_files)}: {uploaded_file.name}...")
                 image = Image.open(uploaded_file).convert("RGB")
                 face = extract_face(image)
+                
                 if face is None:
                     results_list.append({
                         "Filename": uploaded_file.name,
@@ -433,24 +417,19 @@ with tab2:
                     })
                     progress_bar.progress((idx + 1) / len(uploaded_files))
                     continue
-              if DEMO_MODE:
-
-    is_fake, real_confidence, fake_confidence = get_demo_prediction()
-
-else:
-
-    tensor = transform(face).unsqueeze(0).to(device)
-
-    with torch.no_grad():
-        raw_prob = torch.sigmoid(model(tensor)).item()
-
-    fake_confidence = calibrate_confidence(raw_prob)
-    fake_confidence = add_confidence_noise(fake_confidence)
-
-    real_confidence = 1 - fake_confidence
-
-    is_fake = fake_confidence > real_confidence
                 
+                if DEMO_MODE:
+                    is_fake, real_confidence, fake_confidence = get_demo_prediction()
+                else:
+                    tensor = transform(face).unsqueeze(0).to(device)
+                    with torch.no_grad():
+                        raw_prob = torch.sigmoid(model(tensor)).item()
+                    
+                    fake_confidence = calibrate_confidence(raw_prob)
+                    fake_confidence = add_confidence_noise(fake_confidence)
+                    real_confidence = 1 - fake_confidence
+                
+                is_fake = fake_confidence > real_confidence
                 display_confidence = (
                     fake_confidence if is_fake
                     else real_confidence
@@ -468,25 +447,30 @@ else:
                     "Confidence": f"{display_confidence:.1%}",
                 })
                 progress_bar.progress((idx + 1) / len(uploaded_files))
+            
             status_text.empty()
             progress_bar.empty()
+            
             # Results table
             st.markdown("---")
             st.subheader("📊 Results")
             df = pd.DataFrame(results_list)
             st.dataframe(df, use_container_width=True, hide_index=True)
+            
             # Statistics
             col1, col2, col3 = st.columns(3)
             fake_count = sum(1 for r in results_list if "DEEPFAKE" in r["Result"])
             real_count = sum(1 for r in results_list if "REAL" in r["Result"])
             no_face = len(results_list) - fake_count - real_count
+            
             with col1:
                 st.metric("Total Images", len(results_list))
             with col2:
                 st.metric("🚨 Deepfakes", fake_count)
             with col3:
                 st.metric("✅ Real", real_count)
-            # CSV D
+            
+            # CSV Download
             csv = df.to_csv(index=False)
             st.download_button(
                 label="📥 Download Results (CSV)",
@@ -496,6 +480,7 @@ else:
             )
     else:
         st.info("👆 Upload multiple images to analyze them in batch")
+
 # TAB 3: VIDEO
 with tab3:
     st.markdown("### Upload Video")
@@ -505,31 +490,40 @@ with tab3:
         type=["mp4", "mov", "avi"],
         key="video"
     )
+    
     if video_file:
         st.write(f"**File: {video_file.name}**")
         st.write(f"**Size: {video_file.size / (1024*1024):.2f} MB**")
+        
         # Size check
         if video_file.size > 20 * 1024 * 1024:
             st.error("❌ Video too large (max 20MB)")
             st.stop()
+        
         if st.button("🔍 Analyze Video", use_container_width=True):
             with st.spinner("⏳ Extracting frames..."):
                 frames = extract_video_frames(video_file, max_frames=20)
+            
             st.write(f"**Extracted {len(frames)} frames for analysis**")
+            
             with st.spinner("🔄 Analyzing frames..."):
                 model, device = load_model()
                 results = analyze_video_frames(frames, model, device)
+            
             # Results
             st.markdown("---")
             st.subheader("📋 Frame Analysis")
             df = pd.DataFrame(results)
             st.dataframe(df, use_container_width=True, hide_index=True)
+            
             # Video verdict
             fake_frames = sum(1 for r in results if "DEEPFAKE" in r["Result"])
             total_frames = len(results)
             fake_percentage = (fake_frames / total_frames * 100) if total_frames > 0 else 0
+            
             st.markdown("---")
             st.subheader("🎬 Video Verdict")
+            
             if fake_percentage > 50:
                 st.markdown(f"""
                 <div class="result-fake">
@@ -552,6 +546,7 @@ with tab3:
                     <p style="color:#94A3B8;font-size:12px;margin:0;">Deepfake Percentage</p>
                 </div>
                 """, unsafe_allow_html=True)
+            
             # Statistics
             col1, col2, col3 = st.columns(3)
             with col1:
@@ -560,7 +555,8 @@ with tab3:
                 st.metric("🚨 Deepfake", fake_frames)
             with col3:
                 st.metric("✅ Real", total_frames - fake_frames)
-            # CSV 
+            
+            # CSV Download
             csv = df.to_csv(index=False)
             st.download_button(
                 label="📥 Download Frame Results (CSV)",
@@ -570,7 +566,8 @@ with tab3:
             )
     else:
         st.info("👆 Upload a video to analyze frame-by-frame deepfake detection")
-#FOOTER 
+
+# FOOTER 
 st.markdown("---")
 st.markdown("""
 <div style="text-align: center; padding: 20px; color: #475569;">
