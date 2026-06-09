@@ -206,10 +206,12 @@ def extract_video_frames(video_file, max_frames=20, frame_interval=5):
     return frames
 def analyze_video_frames(frames, model, device):
     """Analyze all frames from video"""
+
     results = []
+
     for frame_idx, frame in enumerate(frames):
-        
-         if DEMO_MODE:
+
+        if DEMO_MODE:
 
             demo_results = [
                 ("REAL", "92%"),
@@ -221,7 +223,7 @@ def analyze_video_frames(frames, model, device):
                 ("FAKE", "94%"),
             ]
 
-            result, conf = random.choice(demo_results)
+            result, conf = demo_results[frame_idx % len(demo_results)]
 
             results.append({
                 "Frame": f"Frame {frame_idx+1}",
@@ -240,10 +242,12 @@ def analyze_video_frames(frames, model, device):
                 "Confidence": "—"
             })
             continue
-            
+
         tensor = transform(face).unsqueeze(0).to(device)
+
         with torch.no_grad():
             raw_prob = torch.sigmoid(model(tensor)).item()
+
         fake_confidence = calibrate_confidence(raw_prob)
         fake_confidence = add_confidence_noise(fake_confidence)
 
@@ -254,13 +258,14 @@ def analyze_video_frames(frames, model, device):
         display_confidence = (
             fake_confidence if is_fake
             else real_confidence
-)
-       
+        )
+
         results.append({
             "Frame": f"Frame {frame_idx+1}",
             "Result": "DEEPFAKE" if is_fake else "REAL",
             "Confidence": f"{display_confidence:.1%}"
         })
+
     return results
 # TRANSFORM 
 transform = transforms.Compose([
