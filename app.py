@@ -357,7 +357,7 @@ with tab1:
         display_confidence = fake_confidence if is_fake else real_confidence
                 
             
-            if is_fake:
+        if is_fake:
                 st.markdown(f"""
                 <div class="result-fake">
                     <h2 style="color:#A32D2D;margin:0;">⚠️ DEEPFAKE DETECTED</h2>
