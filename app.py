@@ -332,24 +332,27 @@ with tab1:
     with right:
         st.markdown("### Analysis Result")
         if uploaded:
-            with st.spinner("🔄 Analyzing image..."):
-                model, device = load_model()
-                tensor = transform(image).unsqueeze(0).to(device)
+
+    with st.spinner("🔄 Analyzing image..."):
+
+        model, device = load_model()
+        tensor = transform(image).unsqueeze(0).to(device)
+
         if DEMO_MODE:
 
-    is_fake, real_confidence, fake_confidence = get_demo_prediction()
+            is_fake, real_confidence, fake_confidence = get_demo_prediction()
 
-else:
+        else:
 
-    with torch.no_grad():
-        raw_prob = torch.sigmoid(model(tensor)).item()
+            with torch.no_grad():
+                raw_prob = torch.sigmoid(model(tensor)).item()
 
-    fake_confidence = calibrate_confidence(raw_prob)
-    fake_confidence = add_confidence_noise(fake_confidence)
+            fake_confidence = calibrate_confidence(raw_prob)
+            fake_confidence = add_confidence_noise(fake_confidence)
 
-    real_confidence = 1 - fake_confidence
+            real_confidence = 1 - fake_confidence
 
-    is_fake = fake_confidence > real_confidence
+            is_fake = fake_confidence > real_confidence
             
             display_confidence = (
                 fake_confidence if is_fake
