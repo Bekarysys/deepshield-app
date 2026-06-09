@@ -335,7 +335,7 @@ with tab1:
             with st.spinner("🔄 Analyzing image..."):
                 model, device = load_model()
                 tensor = transform(image).unsqueeze(0).to(device)
-               if DEMO_MODE:
+        if DEMO_MODE:
 
     is_fake, real_confidence, fake_confidence = get_demo_prediction()
 
