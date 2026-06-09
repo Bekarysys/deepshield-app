@@ -355,7 +355,7 @@ with tab1:
             is_fake = fake_confidence > real_confidence
 
         display_confidence = fake_confidence if is_fake else real_confidence
-                )
+                
             
             if is_fake:
                 st.markdown(f"""
